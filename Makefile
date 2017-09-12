@@ -16,7 +16,11 @@ performance: performance.o
 	$(CC) $(CFLAGS) -o $@ $^
 run-performance-test:performance
 	./performanceTest.sh
+dining: dining.o
+	$(CC) $(CFLAGS) -o $@ $^
+run-dining: dining
+	./dining
 clean:
-	rm -f non-determinism shared-variable performance *.o
+	rm -f non-determinism shared-variable performance dining *.o
 
 .PHONY: all clean

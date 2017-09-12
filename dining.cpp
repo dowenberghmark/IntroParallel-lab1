@@ -4,7 +4,7 @@
 
 std::mutex out;
 
-void philosopher(int n, std::mutex *left, std::mutex *right)
+void philosopher(int n, std::mutex *low, std::mutex *high)
 {
   while (true)
     {
@@ -12,14 +12,14 @@ void philosopher(int n, std::mutex *left, std::mutex *right)
       std::cout << "Philosopher " << n << " is thinking." << std::endl;
       out.unlock();
 
-      left->lock();
+      low->lock();
       out.lock();
-      std::cout << "Philosopher " << n << " picked up her left fork." << std::endl;
+      std::cout << "Philosopher " << n << " picked up her low fork." << std::endl;
       out.unlock();
 
-      right->lock();
+      high->lock();
       out.lock();
-      std::cout << "Philosopher " << n << " picked up her right fork." << std::endl;
+      std::cout << "Philosopher " << n << " picked up her high fork." << std::endl;
       out.unlock();
 
       out.lock();
@@ -27,14 +27,14 @@ void philosopher(int n, std::mutex *left, std::mutex *right)
       out.unlock();
 
       out.lock();
-      std::cout << "Philosopher " << n << " is putting down her right fork." << std::endl;
+      std::cout << "Philosopher " << n << " is putting down her high fork." << std::endl;
       out.unlock();
-      right->unlock();
+      high->unlock();
 
       out.lock();
-      std::cout << "Philosopher " << n << " is putting down her left fork." << std::endl;
+      std::cout << "Philosopher " << n << " is putting down her low fork." << std::endl;
       out.unlock();
-      left->unlock();
+      low->unlock();
     }
 }
 
@@ -73,9 +73,10 @@ int main(int argc, char *argv[])
   std::thread *ph = new std::thread[philosophers];
   for (int i=0; i<philosophers; ++i)
     {
-      int left = i;
-      int right = (i == 0 ? philosophers : i) - 1;
-      ph[i] = std::thread(philosopher, i, &forks[left], &forks[right]);
+      // make all philosophers pick up their "lowest fork first"
+      int low = (i == (philosophers - 1) ? 0 : i);
+      int high = (i == (philosophers - 1) ? i : i+1);
+      ph[i] = std::thread(philosopher, i, &forks[low], &forks[high]);
     }
 
   ph[0].join();
